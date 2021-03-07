@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 JSONObject obj = new JSONObject(s);
                 if (!obj.getBoolean("error")) {
-                    JSONArray items = obj.getJSONArray("orderList");
+                    JSONArray items = obj.getJSONArray("orderlist");
 
                     for (int it = 0; it < items.length(); it++) {
                         JSONObject orderItem = items.getJSONObject(it);
