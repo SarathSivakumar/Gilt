@@ -1,12 +1,16 @@
 package com.streak.gilt;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -36,6 +40,15 @@ public class OrdersRVAdapter extends RecyclerView.Adapter<OrdersRVAdapter.ViewHo
             holder.customername.setText(order.getCustomerName());
             holder.model.setText(order.getModel());
         }
+        holder.orderLayout.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //Toast.makeText(context,""+order.getOrderID(),Toast.LENGTH_SHORT).show();
+                if (context instanceof MainActivity) {
+                    ((MainActivity)context).moveToViewOrder(order.getOrderID());
+                }
+            }
+        });
     }
 
     @Override
@@ -45,11 +58,15 @@ public class OrdersRVAdapter extends RecyclerView.Adapter<OrdersRVAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         public TextView orderid,customername,model;
+        public ConstraintLayout orderLayout;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             orderid=(TextView) itemView.findViewById(R.id.order_id);
             customername=(TextView) itemView.findViewById(R.id.customer_name);
             model=(TextView) itemView.findViewById(R.id.model_name);
+            orderLayout=(ConstraintLayout) itemView.findViewById(R.id.constraintLayout);
         }
     }
+
+
 }

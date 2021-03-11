@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,17 +35,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         orders_rv=(RecyclerView) findViewById(R.id.home_rv1);
         orders_rv.setHasFixedSize(true);
         orders_rv.setLayoutManager(new LinearLayoutManager(this));
-
         ordersList=new ArrayList<>();
-
         GetOrderList gl = new GetOrderList();
         gl.execute();
     }
-
     public void movetoaddorder(View v){
         Intent intent=new Intent(MainActivity.this,AddOrder.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -94,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(Void... voids) {
             RequestHandler requestHandler = new RequestHandler();
-
             HashMap<String, String> params = new HashMap<>();
             try{
                 return requestHandler.sendPostRequest(Urls.URL_GET_ORDER_LIST,params);
@@ -105,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+    }
+    public void moveToViewOrder(int orderId){
+        Intent intent=new Intent(MainActivity.this,ViewOrderActivity.class);
+        Bundle b=new Bundle();
+        b.putInt("orderID",orderId);
+        intent.putExtras(b);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }
 

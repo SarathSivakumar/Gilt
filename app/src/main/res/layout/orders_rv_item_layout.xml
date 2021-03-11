@@ -17,7 +17,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent=".95" >
+        app:layout_constraintWidth_percent=".95"
+        android:onClick="openSelectedItem">
 
         <TextView
             android:id="@+id/order_id"

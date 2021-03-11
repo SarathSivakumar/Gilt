@@ -5,5 +5,6 @@ public class Urls {
     public static final String URL_LOGIN= ROOT_URL + "login";
     public static final String URL_ADD_ORDER= ROOT_URL + "addorder";
     public static final String URL_GET_ORDER_LIST= ROOT_URL + "getorderlist";
+    public static final String URL_GET_ORDER_DETAILS= ROOT_URL + "getorder";
 
 }

@@ -19,30 +19,32 @@
         android:textStyle="bold"
         android:textAlignment="viewEnd"
         android:textSize="24dp"
-        app:layout_constraintBottom_toTopOf="@id/add_order_scrollview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="0.2"
         android:layout_margin="10dp"
         android:padding="10dp"/>
 
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="600dp"
-        android:fillViewport="true"
         android:id="@+id/add_order_scrollview"
-
-        app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader">
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/add_order_btn"
+        app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader"
+        tools:layout_editor_absoluteX="10dp">
 
         <LinearLayout
-            app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader"
+            android:id="@+id/add_order_form"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="10dp"
-            android:paddingBottom="20dp"
-            android:id="@+id/add_order_form"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/shapeemail"
             android:orientation="vertical"
-            android:paddingTop="10dp">
+            app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -179,6 +181,83 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/txt_attachment"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="* Image"
+                    android:textAlignment="viewEnd"
+                    android:textSize="12dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:id="@+id/attachmentview"
+                    android:background="@drawable/shapeattachment_bg"
+                    android:visibility="invisible"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@+id/txt_attachment"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:padding="3dp"
+                    android:layout_marginLeft="5dp"
+                   >
+
+                    <ImageView
+                        android:id="@+id/thumbnail"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_margin="3dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        />
+
+                    <TextView
+                        android:id="@+id/filename"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        app:layout_constraintStart_toEndOf="@+id/thumbnail"
+                        android:text="sunapana.jpg"
+                        android:lines="1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginStart="10dp"
+                        app:layout_constraintEnd_toStartOf="@+id/closeattachment"
+                        android:layout_marginEnd="10dp"/>
+                    <TextView
+                        android:id="@+id/closeattachment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="X"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:onClick="closeattachment"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="8dp"
+                        />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="+ Add Attachment"
+                    android:id="@+id/attachment_hyperlink"
+                    android:onClick="selectImage"
+                    app:layout_constraintStart_toEndOf="@+id/txt_attachment"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:textColor="@color/colorPrimaryDark"
+                    app:layout_constraintBottom_toBottomOf="parent"
+
+                    app:layout_constraintTop_toBottomOf="@+id/attachmentview"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal">
+
+                <TextView
                     android:id="@+id/txt_size"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
@@ -187,7 +266,6 @@
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/et_size"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -305,9 +383,13 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="addorder"
         android:text="Add"
+        android:id="@+id/add_order_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:onClick="addorder"
-        app:layout_constraintTop_toBottomOf="@+id/add_order_scrollview" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
