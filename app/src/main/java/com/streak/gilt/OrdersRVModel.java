@@ -13,7 +13,6 @@ public class OrdersRVModel {
         this.model = model;
         this.orderID = orderID;
         this.date = date;
-
     }
 
     public String getCustomerName() {

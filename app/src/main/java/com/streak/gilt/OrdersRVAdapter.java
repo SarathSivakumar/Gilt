@@ -39,6 +39,7 @@ public class OrdersRVAdapter extends RecyclerView.Adapter<OrdersRVAdapter.ViewHo
             holder.orderid.setText(""+order.getOrderID());
             holder.customername.setText(order.getCustomerName());
             holder.model.setText(order.getModel());
+            holder.creationdate.setText(order.getDate());
         }
         holder.orderLayout.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -57,13 +58,14 @@ public class OrdersRVAdapter extends RecyclerView.Adapter<OrdersRVAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        public TextView orderid,customername,model;
+        public TextView orderid,customername,model,creationdate;
         public ConstraintLayout orderLayout;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             orderid=(TextView) itemView.findViewById(R.id.order_id);
             customername=(TextView) itemView.findViewById(R.id.customer_name);
             model=(TextView) itemView.findViewById(R.id.model_name);
+            creationdate=(TextView) itemView.findViewById(R.id.creation_date);
             orderLayout=(ConstraintLayout) itemView.findViewById(R.id.constraintLayout);
         }
     }

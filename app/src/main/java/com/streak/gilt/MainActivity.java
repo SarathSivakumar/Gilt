@@ -7,11 +7,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.hardware.camera2.TotalCaptureResult;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -30,11 +35,51 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView orders_rv ;
     private RecyclerView.Adapter order_rv_adapter;
     private List<OrdersRVModel> ordersList;
+    SessionManager sessionManager;
+    int userid;
+    String userRole;
+    ImageView addOrder,profile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sessionManager=new SessionManager(MainActivity.this);
+        userid=sessionManager.getSession();
+        userRole=sessionManager.getRole();
+        addOrder=(ImageView) findViewById(R.id.add_order);
+
+        profile=(ImageView) findViewById(R.id.icon_profile);
+        profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(MainActivity.this, profile);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater().inflate(R.menu.account_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if(item.getTitle().equals("Logout")){
+                            logout();
+                        }
+                        else if(item.getTitle().equals("Add Model")){
+                            moveToAddModel();
+                        }
+                        else if(item.getTitle()=="Add Factory"){
+                            //moveToAddFactory();
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show();
+            }
+        });
+        //Toast.makeText(MainActivity.this,userRole,Toast.LENGTH_LONG).show();
+        if(!userRole.equals("admin")){
+            addOrder.setVisibility(View.INVISIBLE);
+        }
         orders_rv=(RecyclerView) findViewById(R.id.home_rv1);
         orders_rv.setHasFixedSize(true);
         orders_rv.setLayoutManager(new LinearLayoutManager(this));
@@ -65,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             String factoryName;
             int orderID;
             String modelName;
+            String creationdate;
             //progressBar.setVisibility(View.GONE);
             try {
                 JSONObject obj = new JSONObject(s);
@@ -77,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
                         orderID = Integer.parseInt(orderItem.getString("id"));
                         modelName = orderItem.getString("model");
                         factoryName=orderItem.getString("factoryname");
-                        ordersList.add(new OrdersRVModel(orderID,modelName+" - "+factoryName,customerName,"12/12/2021"));
+                        creationdate=orderItem.getString("creationdate");
+                        ordersList.add(new OrdersRVModel(orderID,modelName+" - "+factoryName,customerName,creationdate));
                     }
                     order_rv_adapter=new OrdersRVAdapter(ordersList,MainActivity.this);
                     orders_rv.setAdapter(order_rv_adapter);
@@ -93,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(Void... voids) {
             RequestHandler requestHandler = new RequestHandler();
             HashMap<String, String> params = new HashMap<>();
+            params.put("userid", ""+userid);
             try{
                 return requestHandler.sendPostRequest(Urls.URL_GET_ORDER_LIST,params);
             }
@@ -109,6 +157,17 @@ public class MainActivity extends AppCompatActivity {
         b.putInt("orderID",orderId);
         intent.putExtras(b);
         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+    public void logout(){
+        Intent intent=new Intent(MainActivity.this,LoginActivity.class);
+        sessionManager.logout();
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+    public void moveToAddModel(){
+        Intent intent=new Intent(MainActivity.this,ModelManagement.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 }

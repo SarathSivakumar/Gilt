@@ -5,10 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".LoginActivity"
-    android:background="@color/white"
+    android:background="@color/whitebg"
     android:orientation="vertical"
-    android:layout_marginTop="10dp"
-
     >
 
     <TextView
@@ -16,6 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Order"
+        android:layout_marginTop="20dp"
         android:textStyle="bold"
         android:textAlignment="viewEnd"
         android:textSize="24dp"
@@ -29,7 +28,7 @@
         android:id="@+id/add_order_scrollview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/add_order_btn"
         app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader"
@@ -41,8 +40,10 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
+            android:elevation="3dp"
             android:layout_marginBottom="5dp"
-            android:background="@drawable/shapeemail"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/shapewhitecorner"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader">
 
@@ -51,6 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:orientation="horizontal"
+
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
@@ -62,6 +64,7 @@
                     android:text="* Customer Name"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
+                    android:layout_marginRight="5dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_username"
                     app:layout_constraintStart_toStartOf="parent"
@@ -70,15 +73,17 @@
                 <EditText
                     android:id="@+id/et_username"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:inputType="textCapWords"
                     android:maxLines="1"
+                    android:layout_height="50dp"
+                    android:background="@drawable/shapeedittext"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_username"
                     app:layout_constraintTop_toTopOf="parent" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -94,6 +99,7 @@
                     android:text="* Mobile Number"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
+                    android:layout_marginRight="5dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_mobile"
                     app:layout_constraintStart_toStartOf="parent"
@@ -102,9 +108,10 @@
                 <EditText
                     android:id="@+id/et_mobile"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="number"
+                    android:layout_height="50dp"
+                    android:background="@drawable/shapeedittext"
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_mobile"
@@ -122,6 +129,7 @@
                     android:id="@+id/txt_model"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="* Model"
                     android:textAlignment="viewEnd"
@@ -134,12 +142,22 @@
                 <Spinner
                     android:id="@+id/sp_model"
                     android:layout_width="0dp"
-                    android:layout_height="35dp"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/shapeemail"
+                    android:layout_height="50dp"
+                    android:background="@drawable/shapeedittext"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_model"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_down"
+                    android:alpha="0.5"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/sp_model"
+                    app:layout_constraintHorizontal_bias="0.98"
+                    app:layout_constraintStart_toEndOf="@+id/txt_model"
+                    app:layout_constraintTop_toTopOf="@+id/sp_model" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -154,6 +172,7 @@
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:layout_marginRight="5dp"
                     android:text="* Weight"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
@@ -165,7 +184,8 @@
                 <EditText
                     android:id="@+id/et_weight"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
+                    android:background="@drawable/shapeedittext"
                     android:inputType="text"
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -186,6 +206,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="* Image"
+                    android:layout_marginRight="5dp"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -264,15 +285,20 @@
                     android:gravity="center"
                     android:text="* Size"
                     android:textAlignment="viewEnd"
+                    android:layout_marginRight="5dp"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/et_size"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+
 
                 <EditText
                     android:id="@+id/et_size"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
+                    android:background="@drawable/shapeedittext"
                     android:inputType="text"
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -294,6 +320,7 @@
                     android:gravity="center"
                     android:text="Factory"
                     android:textAlignment="viewEnd"
+                    android:layout_marginRight="5dp"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/sp_factory"
@@ -303,12 +330,23 @@
                 <Spinner
                     android:id="@+id/sp_factory"
                     android:layout_width="0dp"
-                    android:layout_height="35dp"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/shapeemail"
+                    android:layout_height="50dp"
+                    android:popupBackground="@drawable/shapeedittext"
+                    android:background="@drawable/shapeedittext"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_factory"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_down"
+                    android:alpha="0.5"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/sp_factory"
+                    app:layout_constraintHorizontal_bias="0.98"
+                    app:layout_constraintStart_toEndOf="@+id/txt_factory"
+                    app:layout_constraintTop_toTopOf="@+id/sp_factory" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -325,6 +363,7 @@
                     android:gravity="center"
                     android:text="* Option"
                     android:textAlignment="viewEnd"
+                    android:layout_marginRight="5dp"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_option"
@@ -336,6 +375,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
+                    android:background="@drawable/shapeedittext"
                     android:lines="20"
                     android:minLines="5"
                     android:scrollbars="vertical"
@@ -358,6 +398,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="Advance"
+                    android:layout_marginRight="5dp"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -368,7 +409,8 @@
                 <EditText
                     android:id="@+id/et_advance"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
+                    android:background="@drawable/shapeedittext"
                     android:inputType="text"
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"

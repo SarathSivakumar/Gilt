@@ -36,6 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:padding="15dp"
+        android:inputType="textPassword"
         android:background="@drawable/shapeemail"
         android:drawableLeft="@drawable/ic_lock_black_24dp"
         android:drawablePadding="10dp"

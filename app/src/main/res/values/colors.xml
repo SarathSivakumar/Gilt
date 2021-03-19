@@ -12,7 +12,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="white">#FFFFFF</color>
-    <color name="ash">#EDF2F2</color>
+    <color name="whitebg">#F9F9F9</color>
+    <color name="ash">#E2E2EA</color>
     <color name="signupColor">#066e8a</color>
 
 </resources>
