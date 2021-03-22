@@ -25,7 +25,7 @@
         android:background="@drawable/shapeemail"
         android:drawableLeft="@drawable/ic_person_black_24"
         android:drawablePadding="10dp"
-        android:hint="Mobile Number"
+        android:hint="Username"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
         android:textColorHighlight="@color/black"/>

@@ -5,6 +5,10 @@
         android:title="Add Model" />
 
     <item
+        android:id="@+id/changePassword"
+        android:title="Change Password"/>
+
+    <item
         android:id="@+id/logout"
         android:title="Logout"/>
 </menu>

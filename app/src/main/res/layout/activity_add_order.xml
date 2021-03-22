@@ -29,7 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="5dp"
+        android:layout_marginBottom="20dp"
         android:fillViewport="true"
+
         app:layout_constraintBottom_toTopOf="@+id/add_order_btn"
         app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader"
         tools:layout_editor_absoluteX="10dp">
@@ -300,6 +302,8 @@
                     android:layout_height="50dp"
                     android:background="@drawable/shapeedittext"
                     android:inputType="text"
+                    android:imeOptions="actionSend|flagNoEnterAction"
+
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_size"
@@ -378,6 +382,7 @@
                     android:background="@drawable/shapeedittext"
                     android:lines="20"
                     android:minLines="5"
+                    android:imeOptions="actionSend|flagNoEnterAction"
                     android:scrollbars="vertical"
                     android:scrollHorizontally="false"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -393,28 +398,28 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/txt_advance"
+                    android:id="@+id/txt_seal"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Advance"
+                    android:text="Seal"
                     android:layout_marginRight="5dp"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/et_advance"
+                    app:layout_constraintEnd_toStartOf="@id/et_seal"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <EditText
-                    android:id="@+id/et_advance"
+                    android:id="@+id/et_seal"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:background="@drawable/shapeedittext"
                     android:inputType="text"
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/txt_advance"
+                    app:layout_constraintStart_toEndOf="@id/txt_seal"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

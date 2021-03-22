@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,12 +43,20 @@ public class AddOrder extends AppCompatActivity {
     private int PICK_IMAGE_REQUEST=1;
     private Uri filepath;
     private Bitmap bitmap;
-    EditText et_customername,et_mobilenumber,et_wieght,et_size,et_options,et_advance;
+    EditText et_customername,et_mobilenumber,et_wieght,et_size,et_options,et_seal;
     TextView image_hyperlink,txt_filepath;
     Spinner et_factorname,et_modelname;
     ConstraintLayout img_layout;
     ImageView thumbnail;
     String filename;
+    Spinner modelSpinner,factorySpinner;
+    ArrayList<String> models;
+    ArrayList<String> modelid;
+
+    ArrayList<String> factories;
+    ArrayList<String> factoryID;
+
+    ScrollView scrollView;
     protected void onCreate(Bundle savedInstanceState) {
         requestStoragePermission();
         super.onCreate(savedInstanceState);
@@ -60,30 +69,27 @@ public class AddOrder extends AppCompatActivity {
         et_wieght=this.findViewById(R.id.et_weight);
         et_size=this.findViewById(R.id.et_size);
         et_options=this.findViewById(R.id.et_option);
-        et_advance=this.findViewById(R.id.et_advance);
+        et_seal=this.findViewById(R.id.et_seal);
         image_hyperlink=this.findViewById(R.id.attachment_hyperlink);
         thumbnail=this.findViewById(R.id.thumbnail);
         txt_filepath=this.findViewById(R.id.filename);
         img_layout=this.findViewById(R.id.attachmentview);
 
-        Spinner modelSpinner=findViewById(R.id.sp_model);
-        Spinner factorySpinner=findViewById(R.id.sp_factory);
-        ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add("Thaali");
-        arrayList.add("Mothiram");
-        arrayList.add("Ear Ring");
-        arrayList.add("Aaram");
+        scrollView=findViewById(R.id.add_order_scrollview);
+        modelSpinner=findViewById(R.id.sp_model);
+        factorySpinner=findViewById(R.id.sp_factory);
+        models = new ArrayList<>();
+        modelid=new ArrayList<>();
 
-        ArrayList<String> arrayList1 = new ArrayList<>();
-        arrayList1.add("Gandhipuram");
-        arrayList1.add("Ukkadam");
-        arrayList1.add("Peelamedu");
-        arrayList1.add("Chinniyampalayam");
-        arrayList1.add("Saravanampatti");
+        factories=new ArrayList<>();
+        factoryID=new ArrayList<>();
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, arrayList);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        modelSpinner.setAdapter(arrayAdapter);
+        GetModelList gml=new GetModelList();
+        gml.execute();
+
+        GetFactoryList gfl=new GetFactoryList();
+       gfl.execute();
+
         modelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -95,9 +101,6 @@ public class AddOrder extends AppCompatActivity {
             }
         });
 
-        arrayAdapter=new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,arrayList1);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        factorySpinner.setAdapter(arrayAdapter);
         factorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -110,18 +113,26 @@ public class AddOrder extends AppCompatActivity {
 
             }
         });
+        scrollView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus)
+                    scrollView.scrollBy(0, 150);
+            }
+        });
+
     }
 
     public void addorder(View v){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         RequestHandler requestHandler = new RequestHandler();
-        String input_customername,input_option,input_advance,input_factoryname,input_modelname;
+        String input_customername,input_option,input_seal,input_factoryname,input_modelname;
         String input_mobilenumber;
         String input_weight,input_size;
         String input_factoryid,input_modelid;
         String path = getPath(filepath);
         input_customername=et_customername.getText().toString();
-        input_advance=et_advance.getText().toString();
+        input_seal=et_seal.getText().toString();
         input_option=et_options.getText().toString();
         input_factoryname=et_factorname.getSelectedItem().toString();
         input_modelname=et_modelname.getSelectedItem().toString();
@@ -130,29 +141,8 @@ public class AddOrder extends AppCompatActivity {
         input_size=et_size.getText().toString();
 
 
-        if(input_factoryname.equals("Gandhipuram")){
-            input_factoryid="1";
-        }else if(input_factoryname.equals("Ukkadam")){
-            input_factoryid="2";
-        }else if(input_factoryname.equals("Peelamedu")){
-            input_factoryid="3";
-        }else if(input_factoryname.equals("Chinniyampalayam")){
-            input_factoryid="4";
-        }else{
-            input_factoryid="5";
-        }
-
-
-        if(input_modelname.equals("Thaali")){
-            input_modelid="1";
-        }else if(input_modelname.equals("Mothiram")){
-            input_modelid="2";
-        }else if(input_modelname.equals("Ear ring")){
-            input_modelid="3";
-        }else{
-            input_modelid="4";
-        }
-
+        input_factoryid=factoryID.get(factories.indexOf(input_factoryname));
+        input_modelid=modelid.get(models.indexOf(input_modelname));
 
         class AddOrderReq extends AsyncTask<Void, Void, String> {
 
@@ -197,7 +187,7 @@ public class AddOrder extends AppCompatActivity {
                 params.put("weight", input_weight);
                 params.put("size1", input_size);
                 params.put("option1", input_option);
-                params.put("advance", input_advance);
+                params.put("seal", input_seal);
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                 byte[] imageBytes = baos.toByteArray();
                 String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
@@ -248,10 +238,11 @@ public class AddOrder extends AppCompatActivity {
         }
     }
     private void ShowFileChooser() {
-        Intent intent = new Intent();
+        Intent intent = new Intent(Intent.ACTION_EDIT);
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+
 
     }
     @Override
@@ -293,5 +284,110 @@ public class AddOrder extends AppCompatActivity {
     }
     public void closeattachment(View view){
         img_layout.setVisibility(View.INVISIBLE);
+    }
+    class GetModelList extends AsyncTask<Void, Void, String> {
+
+        ProgressBar progressBar;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //progressBar = (ProgressBar) findViewById(R.id.progressBar);
+            // progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            try {
+                JSONObject obj = new JSONObject(s);
+                //Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
+                if (!obj.getBoolean("error")) {
+                    JSONArray items = obj.getJSONArray("modellist");
+                    models.clear();
+                    for (int it = 0; it < items.length(); it++) {
+                        JSONObject orderItem = items.getJSONObject(it);
+                        models.add(orderItem.getString("modelname"));
+                        modelid.add(orderItem.getString("modelid"));
+                    }
+                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_item, models);
+                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    modelSpinner.setAdapter(arrayAdapter);
+
+                }else {
+                    Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            RequestHandler requestHandler = new RequestHandler();
+            HashMap<String, String> params = new HashMap<>();
+            try{
+                return requestHandler.sendPostRequest(Urls.URL_GET_MODEL_LIST,params);
+            }
+            catch (Exception e){
+                Toast.makeText(getApplicationContext(), "Couldn't connect to server", Toast.LENGTH_SHORT).show();
+                return  null;
+            }
+
+        }
+    }
+
+    class GetFactoryList extends AsyncTask<Void, Void, String> {
+
+        ProgressBar progressBar;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //progressBar = (ProgressBar) findViewById(R.id.progressBar);
+            // progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            try {
+                JSONObject obj = new JSONObject(s);
+                //Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
+                if (!obj.getBoolean("error")) {
+                    JSONArray items = obj.getJSONArray("factorylist");
+                    factories.clear();
+                    for (int it = 0; it < items.length(); it++) {
+                        JSONObject orderItem = items.getJSONObject(it);
+                        factories.add(orderItem.getString("factoryname"));
+                        factoryID.add(orderItem.getString("factoryid"));
+                    }
+                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_item, factories);
+                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    factorySpinner.setAdapter(arrayAdapter);
+
+                }else {
+                    Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            RequestHandler requestHandler = new RequestHandler();
+            HashMap<String, String> params = new HashMap<>();
+            try{
+                return requestHandler.sendPostRequest(Urls.URL_GET_FACTORY_LIST,params);
+            }
+            catch (Exception e){
+                Toast.makeText(getApplicationContext(), "Couldn't connect to server", Toast.LENGTH_SHORT).show();
+                return  null;
+            }
+
+        }
     }
 }

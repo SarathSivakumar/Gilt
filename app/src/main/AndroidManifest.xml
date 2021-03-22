@@ -17,7 +17,7 @@
         <activity android:name=".ViewOrderActivity"></activity>
         <activity
             android:name=".AddOrder"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="stateVisible|adjustResize"></activity>
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     int userid;
     String userRole;
     ImageView addOrder,profile;
-
+    ViewOrderMoreBottomSheet viewOrderMoreBottomSheet=new ViewOrderMoreBottomSheet();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +56,9 @@ public class MainActivity extends AppCompatActivity {
                 PopupMenu popup = new PopupMenu(MainActivity.this, profile);
                 //Inflating the Popup using xml file
                 popup.getMenuInflater().inflate(R.menu.account_menu, popup.getMenu());
-
+                if(!userRole.equals("admin")){
+                   popup.getMenu().findItem(R.id.add_model).setVisible(false);
+                }
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
@@ -66,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
                         else if(item.getTitle().equals("Add Model")){
                             moveToAddModel();
                         }
-                        else if(item.getTitle()=="Add Factory"){
-                            //moveToAddFactory();
+                        else if(item.getTitle().equals("Change Password")){
+                            viewOrderMoreBottomSheet.show(getSupportFragmentManager(),"TAG");
                         }
                         return true;
                     }

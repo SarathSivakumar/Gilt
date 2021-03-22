@@ -66,14 +66,14 @@
                 android:text="Weight"
                 android:layout_marginRight="15dp"
                 android:textAlignment="textEnd"
-                android:id="@+id/txt_orderdetails_size" />
+                android:id="@+id/txt_orderdetails_weight" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Aaram"
-                android:id="@+id/orderdetails_size" />
+                android:id="@+id/orderdetails_weight" />
         </TableRow>
 
         <TableRow
@@ -87,14 +87,14 @@
                 android:text="Size"
                 android:textAlignment="textEnd"
                 android:layout_marginRight="15dp"
-                android:id="@+id/txt_orderdetails_weight" />
+                android:id="@+id/txt_orderdetails_size" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Aaram"
-                android:id="@+id/orderdetails_weight" />
+                android:id="@+id/orderdetails_size" />
         </TableRow>
 
         <TableRow
