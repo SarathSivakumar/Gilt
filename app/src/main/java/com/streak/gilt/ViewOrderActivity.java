@@ -457,7 +457,7 @@ public class ViewOrderActivity extends AppCompatActivity {
             fo.close();
 
         } else {
-            // Do something else on failure
+
         }
 
 
