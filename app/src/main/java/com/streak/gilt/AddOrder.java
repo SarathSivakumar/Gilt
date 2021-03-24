@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,24 +45,26 @@ public class AddOrder extends AppCompatActivity {
     private Uri filepath;
     private Bitmap bitmap;
     EditText et_customername,et_mobilenumber,et_wieght,et_size,et_options,et_seal;
-    TextView image_hyperlink,txt_filepath;
+    TextView image_hyperlink,txt_filepath,txt_addorderheader;
     Spinner et_factorname,et_modelname;
     ConstraintLayout img_layout;
     ImageView thumbnail;
-    String filename;
+    int orderid;
+    String filename,customfilepath;
     Spinner modelSpinner,factorySpinner;
     ArrayList<String> models;
     ArrayList<String> modelid;
-
+    Button addOrderBtn;
+    Bitmap decodedBitmap;
     ArrayList<String> factories;
     ArrayList<String> factoryID;
-
+    Bundle b;
     ScrollView scrollView;
     protected void onCreate(Bundle savedInstanceState) {
         requestStoragePermission();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_order);
-
+        addOrderBtn=this.findViewById(R.id.add_order_btn);
         et_customername=this.findViewById(R.id.et_username);
         et_factorname=this.findViewById(R.id.sp_factory);
         et_modelname=this.findViewById(R.id.sp_model);
@@ -74,7 +77,7 @@ public class AddOrder extends AppCompatActivity {
         thumbnail=this.findViewById(R.id.thumbnail);
         txt_filepath=this.findViewById(R.id.filename);
         img_layout=this.findViewById(R.id.attachmentview);
-
+        txt_addorderheader=this.findViewById(R.id.txt_addorderheader);
         scrollView=findViewById(R.id.add_order_scrollview);
         modelSpinner=findViewById(R.id.sp_model);
         factorySpinner=findViewById(R.id.sp_factory);
@@ -88,7 +91,40 @@ public class AddOrder extends AppCompatActivity {
         gml.execute();
 
         GetFactoryList gfl=new GetFactoryList();
-       gfl.execute();
+        gfl.execute();
+        b = getIntent().getExtras();
+
+        if(b != null) {
+            orderid=b.getInt("orderID");
+            txt_addorderheader.setText("Edit Order - "+orderid);
+            et_customername.setText(b.getString("customername"));
+            et_mobilenumber.setText(b.getString("mobilenumber"));
+            //System.out.println("Sarath model id" + modelid.indexOf(models.indexOf(b.get("modelname"))));
+            txt_filepath.setText(b.getString("filename"));
+            et_wieght.setText(b.getString("weight"));
+            et_size.setText(b.getString("size"));
+            et_options.setText(b.getString("option"));
+            et_seal.setText(b.getString("seal"));
+            img_layout.setVisibility(View.VISIBLE);
+            customfilepath="customfilepathsarath";
+            txt_filepath.setText("Image.jgp");
+            byte[] decodedString = Base64.decode(b.getString("imgstr"), Base64.DEFAULT);
+            decodedBitmap= BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
+            thumbnail.setImageBitmap(decodedBitmap);
+            addOrderBtn.setText("Update");
+        }
+
+        addOrderBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(addOrderBtn.getText().equals("Add")){
+                    addorder();
+                }
+                else if (addOrderBtn.getText().equals("Update")){
+                    updateorderdetail();
+                }
+            }
+        });
 
         modelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -123,7 +159,7 @@ public class AddOrder extends AppCompatActivity {
 
     }
 
-    public void addorder(View v){
+    public void addorder(){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         RequestHandler requestHandler = new RequestHandler();
         String input_customername,input_option,input_seal,input_factoryname,input_modelname;
@@ -242,8 +278,6 @@ public class AddOrder extends AppCompatActivity {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-
-
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -256,6 +290,8 @@ public class AddOrder extends AppCompatActivity {
                 img_layout.setVisibility(View.VISIBLE);
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filepath);
                 thumbnail.setImageBitmap(bitmap);
+                customfilepath=getPath(filepath);
+                System.out.println("srath -  "+customfilepath);
                 filename=getPath(filepath).substring(getPath(filepath).lastIndexOf("/")+1);
                 txt_filepath.setText(filename);
                 //Toast.makeText(getApplicationContext(),getPath(filepath),Toast.LENGTH_LONG).show();
@@ -285,6 +321,7 @@ public class AddOrder extends AppCompatActivity {
     public void closeattachment(View view){
         img_layout.setVisibility(View.INVISIBLE);
     }
+
     class GetModelList extends AsyncTask<Void, Void, String> {
 
         ProgressBar progressBar;
@@ -314,6 +351,9 @@ public class AddOrder extends AppCompatActivity {
                     ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_item, models);
                     arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     modelSpinner.setAdapter(arrayAdapter);
+                    if(b != null) {
+                        modelSpinner.setSelection(models.indexOf(b.get("modelname").toString()));
+                    }
 
                 }else {
                     Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
@@ -367,7 +407,9 @@ public class AddOrder extends AppCompatActivity {
                     ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_spinner_item, factories);
                     arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     factorySpinner.setAdapter(arrayAdapter);
-
+                    if(b != null) {
+                        factorySpinner.setSelection(factories.indexOf(b.get("factoryname").toString()));
+                    }
                 }else {
                     Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
                 }
@@ -389,5 +431,96 @@ public class AddOrder extends AppCompatActivity {
             }
 
         }
+    }
+
+    public void updateorderdetail(){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        RequestHandler requestHandler = new RequestHandler();
+        String input_customername,input_option,input_seal,input_factoryname,input_modelname;
+        String input_mobilenumber;
+        String input_weight,input_size;
+        String input_factoryid,input_modelid;
+        String path ="";
+        input_customername=et_customername.getText().toString();
+        input_seal=et_seal.getText().toString();
+        input_option=et_options.getText().toString();
+        input_factoryname=et_factorname.getSelectedItem().toString();
+        input_modelname=et_modelname.getSelectedItem().toString();
+        input_mobilenumber=et_mobilenumber.getText().toString();
+        input_weight=et_wieght.getText().toString();
+        input_size=et_size.getText().toString();
+        input_factoryid=factoryID.get(factories.indexOf(input_factoryname));
+        input_modelid=modelid.get(models.indexOf(input_modelname));
+
+        class UpdateOrderReq extends AsyncTask<Void, Void, String> {
+
+            ProgressBar progressBar;
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                //progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                //progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                //progressBar.setVisibility(View.GONE);
+                try {
+                    JSONObject obj = new JSONObject(s);
+                    if (!obj.getBoolean("error")) {
+                        Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
+                        finish();
+                        moveToMain();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Issue while updating order", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            protected String doInBackground(Void... voids) {
+                HashMap<String, String> params = new HashMap<>();
+                params.put("customername", input_customername);
+                params.put("orderid",""+orderid);
+                params.put("mobilenumber", input_mobilenumber);
+                params.put("modelid", input_modelid);
+                params.put("factoryid", input_factoryid);
+                params.put("weight", input_weight);
+                params.put("size1", input_size);
+                params.put("option1", input_option);
+                params.put("seal", input_seal);
+                params.put("username","1");
+                if(customfilepath.equals("customfilepathsarath")){
+                    params.put("imagemodified","unmodified");
+                    params.put("image","");
+                    params.put("imagename","");
+                }
+                else{
+                    params.put("imagemodified","modified");
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] imageBytes = baos.toByteArray();
+                    String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+                    params.put("image",imageString);
+                    params.put("imagename",filename);
+                }
+
+                try{
+                    //System.out.println("Sarath -- "+params);
+                    return requestHandler.sendPostRequest(Urls.URL_UPDATE_ORDER, params);
+                }
+                catch (Exception e){
+                    Toast.makeText(getApplicationContext(), "Couldn't connect to server", Toast.LENGTH_SHORT).show();
+                    return  null;
+                }
+
+            }
+        }
+
+        UpdateOrderReq uor = new UpdateOrderReq();
+        uor.execute();
     }
 }

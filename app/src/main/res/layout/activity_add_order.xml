@@ -430,7 +430,6 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="addorder"
         android:text="Add"
         android:id="@+id/add_order_btn"
         app:layout_constraintBottom_toBottomOf="parent"

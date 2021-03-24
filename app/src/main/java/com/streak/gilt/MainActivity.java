@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         Bundle b=new Bundle();
         b.putInt("orderID",orderId);
         intent.putExtras(b);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
     public void logout(){

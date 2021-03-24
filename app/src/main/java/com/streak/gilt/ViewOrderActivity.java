@@ -71,7 +71,7 @@ public class ViewOrderActivity extends AppCompatActivity {
     private ActivitiesFragment activitiesFragment;
     private CustomerInfoFragment customerInfoFragment;
 
-    ImageView viewmoreorder;
+    ImageView viewmoreorder,editIcon;
 
     public int orderID;
     TextView orderidtxt;
@@ -82,6 +82,12 @@ public class ViewOrderActivity extends AppCompatActivity {
     SessionManager sessionManager;
     View orderdetailsview;
     ConstraintLayout vieworder;
+
+    String customerName;
+    String factoryName;
+    Bitmap img;
+    String imageencoded;
+    String modelName,size,weight,seal,option,mobilenumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +103,19 @@ public class ViewOrderActivity extends AppCompatActivity {
         orderdetailsview.buildDrawingCache();
         sessionManager=new SessionManager(ViewOrderActivity.this);
         userRole=sessionManager.getRole();
+        editIcon=findViewById(R.id.editOrder);
         userid=sessionManager.getSession();
         if(b != null) {
             orderID = b.getInt("orderID");
         }
+
+        editIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateOrder();
+            }
+        });
+
 
         viewmoreorder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +130,7 @@ public class ViewOrderActivity extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         if(item.getTitle().equals("Download Image")){
-                            System.out.println("Sarath - Download Image sarath");
+                            //System.out.println("Sarath - Download Image sarath");
                             try {
                                 savebitmap(decodedBitmap,""+orderID);
                                 Toast.makeText(getApplicationContext(),"Image Downloaded",Toast.LENGTH_SHORT).show();
@@ -298,12 +313,9 @@ public class ViewOrderActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            String customerName;
-            String factoryName;
-            Bitmap img;
-            String modelName,size,weight,seal,option;
-            System.out.println("Sarath -- Reached here");
-            String imageencoded;
+
+           // System.out.println("Sarath -- Reached here");
+
             //progressBar.setVisibility(View.GONE);
             try {
                 JSONObject obj = new JSONObject(s);
@@ -319,6 +331,7 @@ public class ViewOrderActivity extends AppCompatActivity {
                         weight=orderItem.getString("weight");
                         seal = orderItem.getString("seal");
                         option=orderItem.getString("option1");
+                        mobilenumber=orderItem.getString("mobilenumber");
                         imageencoded=orderItem.getString("image");
                     byte[] decodedString = Base64.decode(imageencoded, Base64.DEFAULT);
                     decodedBitmap= BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
@@ -349,7 +362,7 @@ public class ViewOrderActivity extends AppCompatActivity {
 
                     viewPager.setAdapter(viewPagerAdapter);
                 }else {
-                    System.out.println("Sarath -- Invalid params");
+                    //System.out.println("Sarath -- Invalid params");
                     Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
                 }
             } catch (JSONException e) {
@@ -367,7 +380,7 @@ public class ViewOrderActivity extends AppCompatActivity {
             RequestHandler requestHandler = new RequestHandler();
             HashMap<String, String> params = new HashMap<>();
             params.put("orderid",""+orderID);
-            System.out.println("Sarath -- Reached call");
+            //System.out.println("Sarath -- Reached call");
             try{
                 return requestHandler.sendPostRequest(Urls.URL_GET_ORDER_DETAILS,params);
             }
@@ -379,7 +392,6 @@ public class ViewOrderActivity extends AppCompatActivity {
 
         }
     }
-
     public void deleteOrder(int orderID){
 
        //de.execute();
@@ -394,7 +406,6 @@ public class ViewOrderActivity extends AppCompatActivity {
                     }})
                 .setNegativeButton(android.R.string.no, null).show();
     }
-
     class DeleteOrder extends AsyncTask<Void, Void, String> {
 
         ProgressBar progressBar;
@@ -438,7 +449,6 @@ public class ViewOrderActivity extends AppCompatActivity {
 
         }
     }
-
     public static void savebitmap(Bitmap bmp, String orderID) throws IOException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 60, bytes);
@@ -459,14 +469,49 @@ public class ViewOrderActivity extends AppCompatActivity {
         } else {
 
         }
-
-
     }
-
     public void moveToMain(){
         Intent intent=new Intent(ViewOrderActivity.this,MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 
+    public void updateOrder(){
+        Intent intent=new Intent(ViewOrderActivity.this,AddOrder.class);
+        Bundle b=new Bundle();
+
+        b.putInt("orderID",orderID);
+        b.putString("customername",customerName);
+        b.putString("modelname",modelName);
+        b.putString("factoryname",factoryName);
+        b.putString("size",size);
+        b.putString("weight",weight);
+        b.putString("mobilenumber",mobilenumber);
+        b.putString("option",option);
+        b.putString("seal",seal);
+        b.putString("imgstr",convertBitmaptoString(getResizedBitmap(decodedBitmap,30)));
+        intent.putExtras(b);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
+    }
+
+    public String convertBitmaptoString(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
+        return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+    }
 }

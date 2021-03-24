@@ -12,4 +12,5 @@ public class Urls {
     public static final String URL_GET_FACTORY_LIST= ROOT_URL + "getfactorylist";
     public static final String URL_UPDATE_PASSWORD= ROOT_URL + "updatepassword";
     public static final String URL_DELETE_ORDER= ROOT_URL + "deleteorder";
+    public static final String URL_UPDATE_ORDER= ROOT_URL + "updateorder";
 }
