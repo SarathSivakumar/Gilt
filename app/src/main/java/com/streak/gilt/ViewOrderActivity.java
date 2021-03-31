@@ -67,12 +67,11 @@ public class ViewOrderActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
+    private static final int STORAGE_PERMISSION_CODE=4655;
     private OrderDetailsFragment orderDetailsFragment;
     private ActivitiesFragment activitiesFragment;
     private CustomerInfoFragment customerInfoFragment;
-
     ImageView viewmoreorder,editIcon;
-
     public int orderID;
     TextView orderidtxt;
     ImageView orderImage;
@@ -82,11 +81,11 @@ public class ViewOrderActivity extends AppCompatActivity {
     SessionManager sessionManager;
     View orderdetailsview;
     ConstraintLayout vieworder;
-
     String customerName;
     String factoryName;
     Bitmap img;
-    String imageencoded;
+    String imageencoded, audioencoded,audioPath;
+    Boolean isAudioPresent;
     String modelName,size,weight,seal,option,mobilenumber;
 
     @Override
@@ -115,7 +114,9 @@ public class ViewOrderActivity extends AppCompatActivity {
                 updateOrder();
             }
         });
-
+        if(!userRole.equals("admin")){
+            editIcon.setVisibility(View.GONE);
+        }
 
         viewmoreorder.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,12 +126,13 @@ public class ViewOrderActivity extends AppCompatActivity {
                 popupMenu.getMenuInflater().inflate(R.menu.order_menu,popupMenu.getMenu());
                 if(!userRole.equals("admin")){
                     popupMenu.getMenu().findItem(R.id.delete_order).setVisible(false);
+                    editIcon.setVisibility(View.GONE);
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         if(item.getTitle().equals("Download Image")){
-                            //System.out.println("Sarath - Download Image sarath");
+                            requestStoragePermission();
                             try {
                                 savebitmap(decodedBitmap,""+orderID);
                                 Toast.makeText(getApplicationContext(),"Image Downloaded",Toast.LENGTH_SHORT).show();
@@ -190,82 +192,7 @@ public class ViewOrderActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void createPdf(){
-        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        //  Display display = wm.getDefaultDisplay();
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        this.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        float hight = displaymetrics.heightPixels ;
-        float width = displaymetrics.widthPixels ;
 
-        int convertHighet = (int) hight, convertWidth = (int) width;
-
-//        Resources mResources = getResources();
-//        Bitmap bitmap = BitmapFactory.decodeResource(mResources, R.drawable.screenshot);
-
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    System.out.println("Permission present");
-            } else {
-                    System.out.println("Permission not present");
-                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            }
-        }
-
-
-
-        PdfDocument document = new PdfDocument();
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(convertWidth, convertHighet, 1).create();
-        PdfDocument.Page page = document.startPage(pageInfo);
-
-        Canvas canvas = page.getCanvas();
-
-        Paint paint = new Paint();
-        canvas.drawPaint(paint);
-
-        bitmap = Bitmap.createScaledBitmap(bitmap, convertWidth, convertHighet, true);
-
-        paint.setColor(Color.BLUE);
-        canvas.drawBitmap(bitmap, 0, 0 , null);
-        document.finishPage(page);
-
-        // write the document content
-        String targetPdf = "/sdcard/pdffromScroll.pdf";
-        File filePath;
-        filePath = new File(targetPdf);
-        try {
-            document.writeTo(new FileOutputStream(filePath));
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Something wrong: " + e.toString(), Toast.LENGTH_LONG).show();
-        }
-        // close the document
-        document.close();
-        Toast.makeText(this, "PDF of Scroll is created!!!", Toast.LENGTH_SHORT).show();
-        openGeneratedPDF();
-
-    }
-    private void openGeneratedPDF(){
-        File file = new File("/sdcard/gilt/pdffromScroll.pdf");
-        if (file.exists())
-        {
-            Intent intent=new Intent(Intent.ACTION_VIEW);
-            Uri uri = Uri.fromFile(file);
-            intent.setDataAndType(uri, "application/pdf");
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-            try
-            {
-                startActivity(intent);
-            }
-            catch(ActivityNotFoundException e)
-            {
-                Toast.makeText(ViewOrderActivity.this, "No Application available to view pdf", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
     private class ViewPagerAdapter extends FragmentPagerAdapter {
 
         private List<Fragment>fragments=new ArrayList<>();
@@ -313,9 +240,6 @@ public class ViewOrderActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-
-           // System.out.println("Sarath -- Reached here");
-
             //progressBar.setVisibility(View.GONE);
             try {
                 JSONObject obj = new JSONObject(s);
@@ -333,24 +257,50 @@ public class ViewOrderActivity extends AppCompatActivity {
                         option=orderItem.getString("option1");
                         mobilenumber=orderItem.getString("mobilenumber");
                         imageencoded=orderItem.getString("image");
+                        if(orderItem.has("audio")){
+                            audioencoded=orderItem.getString("audio");
+                            byte[] decodedAudioString = Base64.decode(audioencoded, Base64.DEFAULT);
+                            try
+                            {
+                                boolean success = true;
+                                File folder = new File(Environment.getExternalStorageDirectory()
+                                        + File.separator + "gilt"+File.separator +orderID);
+                                if (!folder.exists()) {
+                                    success = folder.mkdirs();
+                                }
+                                if (success) {
+                                    File f = new File(Environment.getExternalStorageDirectory()
+                                            + File.separator + "gilt"+File.separator +orderID+File.separator +"record"+orderID+".3gp");
+                                    f.createNewFile();
+                                    audioPath=f.getPath();
+                                    FileOutputStream fo = new FileOutputStream(f);
+                                    fo.write(decodedAudioString);
+                                    fo.close();
+                                } else {
+
+                                }
+
+                                System.out.println("Audio recorded");
+                            }
+                            catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                            isAudioPresent=true;
+                        }
+                        else
+                            isAudioPresent=false;
+
                     byte[] decodedString = Base64.decode(imageencoded, Base64.DEFAULT);
                     decodedBitmap= BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
 
                     orderImage.setImageBitmap(decodedBitmap);
 
-                   /* Palette.from(decodedBitmap).generate(palette -> {
-                        int vibrant = palette.getVibrantColor(0x000000); // <=== color you want
-                        int vibrantLight = palette.getLightVibrantColor(0x000000);
-                        int vibrantDark = palette.getDarkVibrantColor(0x000000);
-                        int muted = palette.getMutedColor(0x000000);
-                        int mutedLight = palette.getLightMutedColor(0x000000);
-                        int mutedDark = palette.getDarkMutedColor(0x000000);
-                        orderImage.setBackgroundColor(vibrantLight);
-                    });*/
+
                     Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(decodedBitmap, 20, 30, true));
                     orderImage.setBackground(d);
 
-                    orderDetailsFragment=new OrderDetailsFragment(modelName,size,weight,factoryName,option,seal);
+                    orderDetailsFragment=new OrderDetailsFragment(modelName,size,weight,factoryName,option,seal,isAudioPresent,audioPath);
                     activitiesFragment=new ActivitiesFragment();
                     customerInfoFragment=new CustomerInfoFragment();
                     tabLayout.setupWithViewPager(viewPager);
@@ -380,7 +330,6 @@ public class ViewOrderActivity extends AppCompatActivity {
             RequestHandler requestHandler = new RequestHandler();
             HashMap<String, String> params = new HashMap<>();
             params.put("orderid",""+orderID);
-            //System.out.println("Sarath -- Reached call");
             try{
                 return requestHandler.sendPostRequest(Urls.URL_GET_ORDER_DETAILS,params);
             }
@@ -450,6 +399,7 @@ public class ViewOrderActivity extends AppCompatActivity {
         }
     }
     public static void savebitmap(Bitmap bmp, String orderID) throws IOException {
+
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 60, bytes);
         File folder = new File(Environment.getExternalStorageDirectory()
@@ -465,10 +415,21 @@ public class ViewOrderActivity extends AppCompatActivity {
             FileOutputStream fo = new FileOutputStream(f);
             fo.write(bytes.toByteArray());
             fo.close();
-
         } else {
 
         }
+    }
+    private void requestStoragePermission() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+            return;
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            //If the user has denied the permission previously your code will come to this block
+            //Here you can explain why you need this permission
+            //Explain here why you need this permission
+        }
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
     }
     public void moveToMain(){
         Intent intent=new Intent(ViewOrderActivity.this,MainActivity.class);

@@ -31,21 +31,22 @@
         android:layout_margin="5dp"
         android:layout_marginBottom="20dp"
         android:fillViewport="true"
-
+        android:padding="10dp"
         app:layout_constraintBottom_toTopOf="@+id/add_order_btn"
         app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader"
-        tools:layout_editor_absoluteX="10dp">
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="4dp">
 
         <LinearLayout
             android:id="@+id/add_order_form"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:elevation="3dp"
-            android:layout_marginBottom="5dp"
             android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="15dp"
             android:background="@drawable/shapewhitecorner"
+            android:elevation="3dp"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@+id/txt_addorderheader">
 
@@ -54,7 +55,6 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:orientation="horizontal"
-
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
@@ -62,11 +62,11 @@
                     android:id="@+id/txt_username"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="* Customer Name"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
-                    android:layout_marginRight="5dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_username"
                     app:layout_constraintStart_toStartOf="parent"
@@ -75,10 +75,10 @@
                 <EditText
                     android:id="@+id/et_username"
                     android:layout_width="0dp"
-                    android:inputType="textCapWords"
-                    android:maxLines="1"
                     android:layout_height="50dp"
                     android:background="@drawable/shapeedittext"
+                    android:inputType="textCapWords"
+                    android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_username"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -97,11 +97,11 @@
                     android:id="@+id/txt_mobile"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="* Mobile Number"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
-                    android:layout_marginRight="5dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_mobile"
                     app:layout_constraintStart_toStartOf="parent"
@@ -110,10 +110,10 @@
                 <EditText
                     android:id="@+id/et_mobile"
                     android:layout_width="0dp"
-                    android:ems="10"
-                    android:inputType="number"
                     android:layout_height="50dp"
                     android:background="@drawable/shapeedittext"
+                    android:ems="10"
+                    android:inputType="number"
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_mobile"
@@ -153,8 +153,8 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_down"
                     android:alpha="0.5"
+                    android:src="@drawable/ic_down"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/sp_model"
                     app:layout_constraintHorizontal_bias="0.98"
@@ -173,8 +173,8 @@
                     android:id="@+id/txt_weight"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:layout_marginRight="5dp"
+                    android:gravity="center"
                     android:text="* Weight"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
@@ -206,9 +206,9 @@
                     android:id="@+id/txt_attachment"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="* Image"
-                    android:layout_marginRight="5dp"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -216,61 +216,60 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="0dp"
                     android:id="@+id/attachmentview"
-                    android:background="@drawable/shapeattachment_bg"
-                    android:visibility="invisible"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintStart_toEndOf="@+id/txt_attachment"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:padding="3dp"
                     android:layout_marginLeft="5dp"
-                   >
+                    android:background="@drawable/shapeattachment_bg"
+                    android:padding="3dp"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/txt_attachment">
 
                     <ImageView
                         android:id="@+id/thumbnail"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="3dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        />
+                        app:layout_constraintStart_toStartOf="parent" />
 
                     <TextView
                         android:id="@+id/filename"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        app:layout_constraintStart_toEndOf="@+id/thumbnail"
-                        android:text="sunapana.jpg"
-                        android:lines="1"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
                         android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:lines="1"
+                        android:text="sunapana.jpg"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/closeattachment"
-                        android:layout_marginEnd="10dp"/>
+                        app:layout_constraintStart_toEndOf="@+id/thumbnail"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <TextView
                         android:id="@+id/closeattachment"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="X"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:onClick="closeattachment"
-                        app:layout_constraintEnd_toEndOf="parent"
                         android:layout_marginEnd="8dp"
-                        />
+                        android:onClick="closeattachment"
+                        android:text="X"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
                 <TextView
+                    android:id="@+id/attachment_hyperlink"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="+ Add Attachment"
-                    android:id="@+id/attachment_hyperlink"
                     android:onClick="selectImage"
-                    app:layout_constraintStart_toEndOf="@+id/txt_attachment"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="+ Add Attachment"
                     android:textColor="@color/colorPrimaryDark"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/txt_attachment"
 
-                    app:layout_constraintTop_toBottomOf="@+id/attachmentview"/>
+                    app:layout_constraintTop_toBottomOf="@+id/attachmentview" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -284,10 +283,10 @@
                     android:id="@+id/txt_size"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="* Size"
                     android:textAlignment="viewEnd"
-                    android:layout_marginRight="5dp"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_size"
@@ -295,14 +294,13 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
 
-
                 <EditText
                     android:id="@+id/et_size"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:background="@drawable/shapeedittext"
-                    android:inputType="text"
                     android:imeOptions="actionSend|flagNoEnterAction"
+                    android:inputType="text"
 
                     android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -321,10 +319,10 @@
                     android:id="@+id/txt_factory"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="Factory"
                     android:textAlignment="viewEnd"
-                    android:layout_marginRight="5dp"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/sp_factory"
@@ -335,8 +333,8 @@
                     android:id="@+id/sp_factory"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
-                    android:popupBackground="@drawable/shapeedittext"
                     android:background="@drawable/shapeedittext"
+                    android:popupBackground="@drawable/shapeedittext"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_factory"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -344,8 +342,8 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_down"
                     android:alpha="0.5"
+                    android:src="@drawable/ic_down"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="@+id/sp_factory"
                     app:layout_constraintHorizontal_bias="0.98"
@@ -364,10 +362,10 @@
                     android:id="@+id/txt_option"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="* Option"
                     android:textAlignment="viewEnd"
-                    android:layout_marginRight="5dp"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/et_option"
@@ -378,11 +376,11 @@
                     android:id="@+id/et_option"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
                     android:background="@drawable/shapeedittext"
+                    android:imeOptions="actionSend|flagNoEnterAction"
+                    android:inputType="textMultiLine"
                     android:lines="20"
                     android:minLines="5"
-                    android:imeOptions="actionSend|flagNoEnterAction"
                     android:scrollbars="vertical"
                     android:scrollHorizontally="false"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -401,9 +399,9 @@
                     android:id="@+id/txt_seal"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
                     android:gravity="center"
                     android:text="Seal"
-                    android:layout_marginRight="5dp"
                     android:textAlignment="viewEnd"
                     android:textSize="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -421,6 +419,70 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/txt_seal"
                     app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginBottom="30dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/recordBack"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:scaleType="fitEnd"
+                    android:src="@drawable/shapecircle_blue"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/txt_voice"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/recordBtn"
+                    android:layout_width="100dp"
+                    android:layout_height="30dp"
+                    android:scaleType="fitEnd"
+                    android:src="@drawable/ic_baseline_keyboard_voice_24"
+                    app:layout_constraintBottom_toBottomOf="@id/recordBack"
+                    app:layout_constraintEnd_toStartOf="@+id/txt_voice"
+                    app:layout_constraintStart_toStartOf="@id/recordBack"
+                    app:layout_constraintTop_toTopOf="@id/recordBack" />
+
+
+
+                <TextSwitcher
+                    android:layout_margin="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/recordTxtSwitcher"
+                    app:layout_constraintStart_toEndOf="@+id/recordBtn"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </TextSwitcher>
+
+                <TextView
+                    android:id="@+id/closerecording"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="8dp"
+                    android:onClick="closeattachment"
+                    android:text="X"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
