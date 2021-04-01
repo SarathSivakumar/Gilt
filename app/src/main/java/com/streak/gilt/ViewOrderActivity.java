@@ -126,7 +126,7 @@ public class ViewOrderActivity extends AppCompatActivity {
                 popupMenu.getMenuInflater().inflate(R.menu.order_menu,popupMenu.getMenu());
                 if(!userRole.equals("admin")){
                     popupMenu.getMenu().findItem(R.id.delete_order).setVisible(false);
-                    editIcon.setVisibility(View.GONE);
+
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override

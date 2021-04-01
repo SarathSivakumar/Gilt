@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 PopupMenu popup = new PopupMenu(MainActivity.this, profile);
                 //Inflating the Popup using xml file
                 popup.getMenuInflater().inflate(R.menu.account_menu, popup.getMenu());
-                if(!userRole.equals("admin")){
+                if(!(userRole.equals("admin")||userRole.equals("office"))){
                    popup.getMenu().findItem(R.id.add_model).setVisible(false);
                 }
                 //registering popup with OnMenuItemClickListener
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //Toast.makeText(MainActivity.this,userRole,Toast.LENGTH_LONG).show();
-        if(!userRole.equals("admin")){
+        if(!(userRole.equals("admin")||userRole.equals("office"))){
             addOrder.setVisibility(View.INVISIBLE);
         }
         orders_rv=(RecyclerView) findViewById(R.id.home_rv1);

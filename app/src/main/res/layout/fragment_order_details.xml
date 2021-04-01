@@ -112,15 +112,19 @@
                 android:id="@+id/txt_orderdetails_option1" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="250dp"
                 android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:paddingLeft="20dp"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Aaram"
                 android:inputType="textMultiLine"
+                android:scrollHorizontally="false"
+                android:ellipsize="none"
+                android:includeFontPadding="false"
                 android:lines="20"
                 android:minLines="5"
                 android:scrollbars="vertical"
-                android:scrollHorizontally="false"
                 android:id="@+id/orderdetails_option1" />
         </TableRow>
         <TableRow
