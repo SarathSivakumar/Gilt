@@ -124,9 +124,14 @@ public class AddOrder extends AppCompatActivity {
 
         recordText.setInAnimation(getApplicationContext(), android.R.anim.slide_in_left);
         recordText.setOutAnimation(getApplicationContext(), android.R.anim.slide_out_right);
-        recordText.setCurrentText("Tap to Speak");
+        recordText.setCurrentText("Tap Mic to Speak");
 
+        File folder = Environment.getExternalStorageDirectory();
+        String fileName = folder.getPath() + "/gilt/temprecord.3gp";
 
+        File myFile = new File(fileName);
+        if(myFile.exists())
+            myFile.delete();
 
         if(b != null) {
             orderid=b.getInt("orderID");
@@ -194,74 +199,85 @@ public class AddOrder extends AppCompatActivity {
         record_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                File folder = new File(Environment.getExternalStorageDirectory()
-                        + File.separator + "gilt"+File.separator );
-                boolean success = true;
-                if (!folder.exists()) {
-                    success = folder.mkdirs();
-                }
-                if (success) {
-                    pathsave= Environment.getExternalStorageDirectory().getAbsolutePath()+"/Gilt/"+"temprecord.3gp";
-                } else {
-
-                }
-                if(checkPermissionForRecord()){
-                    if(btnStatus==1){
-                        AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.playtopause);
-                        record_btn.setImageDrawable(drawable);
-                        drawable.start();
-                        startHTime = 0L;
-                        timeInMilliseconds = 0L;
-                        timeSwapBuff = 0L;
-                        updatedTime = 0L;
-                        btnStatus=2;
-                        recordText.setText("Recording...");
-                        setupMediaRecorder();
-                        try{
-                            mediaRecorder.prepare();
-                            mediaRecorder.start();
-                            startHTime = SystemClock.uptimeMillis();
-                            customHandler.postDelayed(updateTimerThread, 0);
-                        }
-                        catch (IOException e){
-                            e.printStackTrace();
-                        }
-                    }
-                    else if(btnStatus==2){
-                        AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.pausetoplay);
-                        record_btn.setImageDrawable(drawable);
-                        drawable.start();
-                        mediaRecorder.stop();
-                        timeSwapBuff += timeInMilliseconds;
-                        customHandler.removeCallbacks(updateTimerThread);
-                        //recordText.setText("Audio Recorded"+recordText.toString());
-                        TextView tv = (TextView) recordText.getCurrentView();
-                        if (tv.getText().toString().length()>0) {
-                            tv.setText("Audio Recorded - "+tv.getText().toString());
-                            isAudioRecorded=true;
-                        }
-                        isAudioRecorded=true;
-                        btnStatus=3;
-                        close_recording.setVisibility(View.VISIBLE);
-
-                    }
-                }
-                else{
-                    requestRecordPermission();
-                }
+                recordingProcess();
             }
         });
 
         close_recording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recordText.setText("Tap to Speak");
+                recordText.setText("Tap Mic to Speak");
                 btnStatus=1;
                 isAudioRecorded=false;
                 close_recording.setVisibility(View.INVISIBLE);
             }
         });
+    }
+    public void recordingProcess(){
+        File folder = new File(Environment.getExternalStorageDirectory()
+                + File.separator + "gilt"+File.separator );
+        boolean success = true;
+        if (!folder.exists()) {
+            success = folder.mkdirs();
+        }
+        if (success) {
+            pathsave= Environment.getExternalStorageDirectory().getAbsolutePath()+"/Gilt/"+"temprecord.3gp";
+        } else {
+
+        }
+        if(checkPermissionForRecord()){
+            if(btnStatus==1){
+             recordingProcessStart();
+            }
+            else if(btnStatus==2){
+                recordingProcessStop();
+            }
+        }
+        else{
+            requestRecordPermission();
+        }
+    }
+    public void recordingProcessStart(){
+        if(btnStatus==1){
+            AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.playtopause);
+            record_btn.setImageDrawable(drawable);
+            drawable.start();
+            startHTime = 0L;
+            timeInMilliseconds = 0L;
+            timeSwapBuff = 0L;
+            updatedTime = 0L;
+            btnStatus=2;
+            recordText.setText("Recording...");
+            setupMediaRecorder();
+            try{
+                mediaRecorder.prepare();
+                mediaRecorder.start();
+                startHTime = SystemClock.uptimeMillis();
+                customHandler.postDelayed(updateTimerThread, 0);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+    public void recordingProcessStop(){
+        if(btnStatus==2) {
+            AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.pausetoplay);
+            record_btn.setImageDrawable(drawable);
+            drawable.start();
+            mediaRecorder.stop();
+            timeSwapBuff += timeInMilliseconds;
+            customHandler.removeCallbacks(updateTimerThread);
+            //recordText.setText("Audio Recorded"+recordText.toString());
+            TextView tv = (TextView) recordText.getCurrentView();
+            if (tv.getText().toString().length() > 0) {
+                tv.setText("Audio Recorded - " + tv.getText().toString());
+                isAudioRecorded = true;
+            }
+            isAudioRecorded = true;
+            btnStatus = 3;
+            close_recording.setVisibility(View.VISIBLE);
+        }
     }
     public void requestRecordPermission(){
         ActivityCompat.requestPermissions(this,new String[]{
@@ -281,9 +297,7 @@ public class AddOrder extends AppCompatActivity {
                         + String.format("%02d", secs));
             customHandler.postDelayed(this, 0);
         }
-
     };
-
 
     public void setupMediaRecorder(){
         mediaRecorder=new MediaRecorder();
@@ -299,6 +313,7 @@ public class AddOrder extends AppCompatActivity {
         return write_external_storage_result==PackageManager.PERMISSION_GRANTED && record_permission==PackageManager.PERMISSION_GRANTED;
     }
     public void addorder(){
+        recordingProcessStop();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         RequestHandler requestHandler = new RequestHandler();
         String input_customername,input_option,input_seal,input_factoryname,input_modelname;

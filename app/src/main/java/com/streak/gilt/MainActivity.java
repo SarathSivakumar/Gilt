@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
+    boolean doubleBackToExitPressedOnce = false;
     private RecyclerView orders_rv ;
     private RecyclerView.Adapter order_rv_adapter;
     private List<OrdersRVModel> ordersList;
@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     String userRole;
     ImageView addOrder,profile;
     ViewOrderMoreBottomSheet viewOrderMoreBottomSheet=new ViewOrderMoreBottomSheet();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -171,6 +173,33 @@ public class MainActivity extends AppCompatActivity {
         Intent intent=new Intent(MainActivity.this,ModelManagement.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            minimizeApp();
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
+    }
+    public void minimizeApp() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
     }
 }
 

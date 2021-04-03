@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
@@ -58,6 +59,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +93,7 @@ public class ViewOrderActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestStoragePermission();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_order);
         Bundle b = getIntent().getExtras();
@@ -402,19 +406,28 @@ public class ViewOrderActivity extends AppCompatActivity {
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 60, bytes);
-        File folder = new File(Environment.getExternalStorageDirectory()
+        File folder = new File(Environment.getExternalStorageDirectory().toString()
                 + File.separator + "gilt"+File.separator +orderID);
+        File giltFolder = new File(Environment.getExternalStorageDirectory().toString()
+                + File.separator + "gilt");
         boolean success = true;
+        if (!giltFolder.exists()) {
+            System.out.println("sarath debug - "+giltFolder.getAbsolutePath());
+            giltFolder.mkdir();
+        }
+        else {
+            System.out.println("sarath debug - folder present "+giltFolder.getAbsolutePath());
+        }
         if (!folder.exists()) {
-            success = folder.mkdirs();
+                success = folder.mkdirs();
         }
         if (success) {
-            File f = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "gilt"+File.separator +orderID+File.separator +"orderImage"+orderID+".jpg");
-            f.createNewFile();
-            FileOutputStream fo = new FileOutputStream(f);
-            fo.write(bytes.toByteArray());
-            fo.close();
+                File f = new File(Environment.getExternalStorageDirectory()
+                        + File.separator + "gilt"+File.separator +orderID+File.separator +"orderImage"+orderID+".jpg");
+                f.createNewFile();
+                FileOutputStream fo = new FileOutputStream(f);
+                fo.write(bytes.toByteArray());
+                fo.close();
         } else {
 
         }
@@ -425,9 +438,7 @@ public class ViewOrderActivity extends AppCompatActivity {
             return;
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            //If the user has denied the permission previously your code will come to this block
-            //Here you can explain why you need this permission
-            //Explain here why you need this permission
+
         }
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
     }
