@@ -1,5 +1,6 @@
 package com.streak.gilt;
 
+import android.media.MediaDataSource;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import android.widget.SeekBar;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,7 +45,7 @@ public class OrderDetailsFragment extends Fragment {
     MediaPlayer mp;
     TableRow audioRow;
     int totalTime;
-
+byte[] decodedAudio;
 
     public OrderDetailsFragment(String model,String size,String weight,String factory, String option, String seal, Boolean isAudio, String audioPath) {
         modeltext=model;
@@ -102,7 +105,6 @@ public class OrderDetailsFragment extends Fragment {
         factory.setText(factorytext);
 
         if(isAudio) {
-
                 mp = MediaPlayer.create(getContext(), Uri.parse(audioPath));
                 mp.setLooping(false);
                 mp.seekTo(0);
@@ -216,7 +218,9 @@ public class OrderDetailsFragment extends Fragment {
             audio_play.setImageResource(R.drawable.ic_play);
         }
     }
-
+    public void onPrepared(MediaPlayer player) {
+        player.start();
+    }
 
 
 }

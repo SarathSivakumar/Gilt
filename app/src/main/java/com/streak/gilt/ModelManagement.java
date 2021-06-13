@@ -2,7 +2,16 @@ package com.streak.gilt;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
@@ -13,12 +22,19 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ModelManagement extends AppCompatActivity {
     ListView modellist;
@@ -26,112 +42,96 @@ public class ModelManagement extends AppCompatActivity {
     ModelBottomSheet modelBottomSheet=new ModelBottomSheet();
     ArrayAdapter<String> modelAdapter;
     ArrayList<String> models=new ArrayList<String>();
+    private DatabaseHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        registerReceiver(new NetworkStateChecker(), new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_model_management);
+        db = new DatabaseHelper(this);
         modellist=findViewById(R.id.modellist);
         addModel=findViewById(R.id.addmodelbutton);
+
+        modelAdapter=new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1,models);
+        modellist.setAdapter(modelAdapter);
+
         addModel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 modelBottomSheet.show(getSupportFragmentManager(),"TAG");
             }
         });
-
-        populateList();
+        loadModels();
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadModels();
+            }
+        };
+        registerReceiver(broadcastReceiver, new IntentFilter("com.gilt.modelsaved"));
     }
-    public void populateList(){
-       GetModelList gml=new GetModelList();
-       gml.execute();
-    }
-    class GetModelList extends AsyncTask<Void, Void, String> {
-
-        ProgressBar progressBar;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            //progressBar = (ProgressBar) findViewById(R.id.progressBar);
-            // progressBar.setVisibility(View.VISIBLE);
+    private void loadModels() {
+        models.clear();
+        Cursor cursor = db.getNames();
+        if (cursor.moveToFirst()) {
+            do {
+                models.add(cursor.getString(cursor.getColumnIndex(DatabaseHelper.COLUMN_NAME)));
+            } while (cursor.moveToNext());
         }
+        modelAdapter=new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1,models);
+        modellist.setAdapter(modelAdapter);
+    }
+    private void refreshList() {
+        modelAdapter.notifyDataSetChanged();
+    }
+    private void saveNameToServer(String model) {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Saving Name...");
+        progressDialog.show();
 
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+        final String name = model;
 
-            try {
-                JSONObject obj = new JSONObject(s);
-                //Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
-                if (!obj.getBoolean("error")) {
-                    JSONArray items = obj.getJSONArray("modellist");
-                    models.clear();
-                    for (int it = 0; it < items.length(); it++) {
-                        JSONObject orderItem = items.getJSONObject(it);
-                        models.add(orderItem.getString("modelname"));
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Urls.URL_ADD_MODEL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        progressDialog.dismiss();
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            if (!obj.getBoolean("error")) {
+                                saveNameToLocalStorage(name, 1);
+                            } else {
+                                saveNameToLocalStorage(name, 0);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    modelAdapter=new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1,models);
-                    modellist.setAdapter(modelAdapter);
-                }else {
-                    Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progressDialog.dismiss();
+                        saveNameToLocalStorage(name, 0);
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("modelname", name);
+                return params;
             }
-        }
+        };
 
-        @Override
-        protected String doInBackground(Void... voids) {
-            RequestHandler requestHandler = new RequestHandler();
-            HashMap<String, String> params = new HashMap<>();
-            try{
-                return requestHandler.sendPostRequest(Urls.URL_GET_MODEL_LIST,params);
-            }
-            catch (Exception e){
-                Toast.makeText(getApplicationContext(), "Couldn't connect to server", Toast.LENGTH_SHORT).show();
-                return  null;
-            }
-
-        }
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
-
+    private void saveNameToLocalStorage(String name, int status) {
+        db.addModel(name, status);
+        models.add(name);
+        refreshList();
+    }
     public void onCloseDialog(String modelname){
-        RequestHandler requestHandler = new RequestHandler();
-        class AddModel extends AsyncTask<Void, Void, String> {
-            ProgressBar progressBar;
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                //progressBar = (ProgressBar) findViewById(R.id.progressBar);
-                //progressBar.setVisibility(View.VISIBLE);
-            }
-            @Override
-            protected void onPostExecute(String s) {
-                super.onPostExecute(s);
-                try {
-                    Toast.makeText(getApplicationContext(), "Model added successfully", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            @Override
-            protected String doInBackground(Void... voids) {
-                HashMap<String, String> params = new HashMap<>();
-                params.put("modelname", modelname);
-                try{
-                    System.out.println("Sarath Log print -- "+params);
-                    return requestHandler.sendPostRequest(Urls.URL_ADD_MODEL, params);
-                }
-                catch (Exception e){
-                    Toast.makeText(getApplicationContext(), "Couldn't connect to server", Toast.LENGTH_SHORT).show();
-                    return  null;
-                }
-
-            }
-        }
-
-        AddModel am = new AddModel();
-        am.execute();
-        populateList();
+        saveNameToServer(modelname);
     }
+
 }

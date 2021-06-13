@@ -1,6 +1,8 @@
 package com.streak.gilt;
 
 import android.Manifest;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -10,13 +12,16 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.TranslateAnimation;
 import android.widget.Adapter;
@@ -48,6 +53,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,19 +87,27 @@ public class AddOrder extends AppCompatActivity {
     ArrayList<String> modelid;
     Button addOrderBtn;
     Bitmap decodedBitmap;
+    ParcelFileDescriptor file;
     Boolean isAudioRecorded;
     ArrayList<String> factories;
     ArrayList<String> factoryID;
     Bundle b;
+    Uri audiouri,deleteUri;
     int btnStatus=1;
     ScrollView scrollView;
     MediaRecorder mediaRecorder;
     final int REQUEST_PERMISSION_RECORD_CODE=1000;
+    Intent intent;
+    String action,type;
 
     protected void onCreate(Bundle savedInstanceState) {
         requestStoragePermission();
         super.onCreate(savedInstanceState);
         isAudioRecorded=false;
+        intent= getIntent();
+       action = intent.getAction();
+        type = intent.getType();
+
         setContentView(R.layout.activity_add_order);
         addOrderBtn=this.findViewById(R.id.add_order_btn);
         et_customername=this.findViewById(R.id.et_username);
@@ -134,25 +153,42 @@ public class AddOrder extends AppCompatActivity {
             myFile.delete();
 
         if(b != null) {
-            orderid=b.getInt("orderID");
-            txt_addorderheader.setText("Edit Order - "+orderid);
-            et_customername.setText(b.getString("customername"));
-            et_mobilenumber.setText(b.getString("mobilenumber"));
-            //System.out.println("Sarath model id" + modelid.indexOf(models.indexOf(b.get("modelname"))));
-            txt_filepath.setText(b.getString("filename"));
-            et_wieght.setText(b.getString("weight"));
-            et_size.setText(b.getString("size"));
-            et_options.setText(b.getString("option"));
-            et_seal.setText(b.getString("seal"));
-            img_layout.setVisibility(View.VISIBLE);
-            customfilepath="customfilepathsarath";
-            txt_filepath.setText("Image.jgp");
-            byte[] decodedString = Base64.decode(b.getString("imgstr"), Base64.DEFAULT);
-            decodedBitmap= BitmapFactory.decodeByteArray(decodedString, 0,decodedString.length);
-            thumbnail.setImageBitmap(decodedBitmap);
-            addOrderBtn.setText("Update");
+            if (Intent.ACTION_SEND.equals(action) && type != null) {
+                if (type.startsWith("image/")) {
+                    Uri image_received = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                    if (image_received != null) {
+                        try {
+                            System.out.println(image_received);
+                            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), image_received);
+                            thumbnail.setImageBitmap(bitmap);
+                            txt_filepath.setText(image_received.toString().substring(image_received.toString().lastIndexOf("%")));
+                            //customfilepath=getPath(image_received);
+                            filename="sarath";
+                            img_layout.setVisibility(View.VISIBLE);
+                        } catch (IOException e) {
+                           Toast.makeText(getApplicationContext(),"Problem while attaching image",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            } else if(b.containsKey("orderID")){
+                orderid = b.getInt("orderID");
+                txt_addorderheader.setText("Edit Order - " + orderid);
+                et_customername.setText(b.getString("customername"));
+                et_mobilenumber.setText(b.getString("mobilenumber"));
+                txt_filepath.setText(b.getString("filename"));
+                et_wieght.setText(b.getString("weight"));
+                et_size.setText(b.getString("size"));
+                et_options.setText(b.getString("option"));
+                et_seal.setText(b.getString("seal"));
+                img_layout.setVisibility(View.VISIBLE);
+                customfilepath = "customfilepathsarath";
+                txt_filepath.setText("Image.jgp");
+                byte[] decodedString = Base64.decode(b.getString("imgstr"), Base64.DEFAULT);
+                decodedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                thumbnail.setImageBitmap(decodedBitmap);
+                addOrderBtn.setText("Update");
+            }
         }
-
         addOrderBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -199,7 +235,12 @@ public class AddOrder extends AppCompatActivity {
         record_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recordingProcess();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    recordingProcess();
+                }
+                else {
+                    recordingProcessOld();
+                }
             }
         });
 
@@ -227,7 +268,7 @@ public class AddOrder extends AppCompatActivity {
         }
         if(checkPermissionForRecord()){
             if(btnStatus==1){
-             recordingProcessStart();
+                recordingProcessStart();
             }
             else if(btnStatus==2){
                 recordingProcessStop();
@@ -239,6 +280,7 @@ public class AddOrder extends AppCompatActivity {
     }
     public void recordingProcessStart(){
         if(btnStatus==1){
+
             AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.playtopause);
             record_btn.setImageDrawable(drawable);
             drawable.start();
@@ -250,8 +292,26 @@ public class AddOrder extends AppCompatActivity {
             recordText.setText("Recording...");
             setupMediaRecorder();
             try{
-                mediaRecorder.prepare();
-                mediaRecorder.start();
+                ContentValues values = new ContentValues(4);
+                values.put(MediaStore.Audio.Media.DISPLAY_NAME,"temp.mp3");
+                values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg");
+                values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music/Recordings/");
+                getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,MediaStore.Audio.Media.DISPLAY_NAME+" in ('temp.mp3')",null);
+                deleteUri=getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
+                deleteAudioTemp(deleteUri);
+
+                audiouri = getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
+                file = getContentResolver().openFileDescriptor(audiouri, "wr");
+                if (file != null) {
+                    mediaRecorder = new MediaRecorder();
+                    mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                    mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                    mediaRecorder.setOutputFile(file.getFileDescriptor());
+                    mediaRecorder.setAudioChannels(1);
+                    mediaRecorder.prepare();
+                    mediaRecorder.start();
+                }
                 startHTime = SystemClock.uptimeMillis();
                 customHandler.postDelayed(updateTimerThread, 0);
             }
@@ -266,6 +326,11 @@ public class AddOrder extends AppCompatActivity {
             record_btn.setImageDrawable(drawable);
             drawable.start();
             mediaRecorder.stop();
+            try {
+                file.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             timeSwapBuff += timeInMilliseconds;
             customHandler.removeCallbacks(updateTimerThread);
             //recordText.setText("Audio Recorded"+recordText.toString());
@@ -302,7 +367,7 @@ public class AddOrder extends AppCompatActivity {
     public void setupMediaRecorder(){
         mediaRecorder=new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
         mediaRecorder.setOutputFile(pathsave);
     }
@@ -320,7 +385,7 @@ public class AddOrder extends AppCompatActivity {
         String input_mobilenumber;
         String input_weight,input_size;
         String input_factoryid,input_modelid;
-        String path = getPath(filepath);
+        //String path = getPath(filepath);
         input_customername=et_customername.getText().toString();
         input_seal=et_seal.getText().toString();
         input_option=et_options.getText().toString();
@@ -335,32 +400,33 @@ public class AddOrder extends AppCompatActivity {
         class AddOrderReq extends AsyncTask<Void, Void, String> {
 
             ProgressBar progressBar;
-
+            Bitmap thumbnail;
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                //progressBar = (ProgressBar) findViewById(R.id.progressBar);
-                //progressBar.setVisibility(View.VISIBLE);
+                progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
-                //progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
 
 
                 try {
-                    //JSONObject obj = new JSONObject(s);
-                    //if (!obj.getBoolean("error")) {
-                       // Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
+                    JSONObject obj = new JSONObject(s);
+                    if (!obj.getBoolean("error")) {
+                        // Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
                         finish();
                         Toast.makeText(getApplicationContext(), "Order added successfully", Toast.LENGTH_SHORT).show();
                         moveToMain();
-
-                   // } else {
-                    //    Toast.makeText(getApplicationContext(), "Issue while adding record", Toast.LENGTH_SHORT).show();
-                   // }
+                    } else {
+                        System.out.println(obj.get("response"));
+                        Toast.makeText(getApplicationContext(), "Issue while adding record", Toast.LENGTH_SHORT).show();
+                    }
                 } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Issue while adding order, Please check connection", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
             }
@@ -381,33 +447,58 @@ public class AddOrder extends AppCompatActivity {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                 byte[] imageBytes = baos.toByteArray();
                 String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+
+                baos.reset();
+                Float width = new Float(bitmap.getWidth());
+                Float height = new Float(bitmap.getHeight());
+                Float ratio = width/height;
+                thumbnail=Bitmap.createScaledBitmap(bitmap, (int)(100 * ratio), 100, false);
+                thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] thumbnailBytes = baos.toByteArray();
+                String thumbnailImageString=Base64.encodeToString(thumbnailBytes, Base64.DEFAULT);
+
                 params.put("image",imageString);
+                params.put("thumbnail",thumbnailImageString);
                 params.put("imagename",filename);
                 params.put("username","1");
                 if(isAudioRecorded){
-                    File file = new File(Environment.getExternalStorageDirectory() + "/Gilt/temprecord.3gp");
-                    try{
-                        FileInputStream in=new FileInputStream(file);
-                        byte fileContent[] = new byte[(int)file.length()];
-                        in.read(fileContent,0,fileContent.length);
-                        audioString = Base64.encodeToString(fileContent,0);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        File file = new File(getRealPathFromURI(getApplicationContext(),audiouri));
+                        try{
+                            FileInputStream in=new FileInputStream(file);
+                            byte fileContent[] = new byte[(int)file.length()];
+                            in.read(fileContent,0,fileContent.length);
+                            audioString = Base64.encodeToString(fileContent,0);
+                        }
+                        catch (Exception e){
+                            System.out.println("Sarath - "+e.getMessage());
+                        }
+                        //String audioString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+                        params.put("audio",audioString);
+                        params.put("audioname","record.mp3");
                     }
-                    catch (Exception e){
-                        System.out.println("Sarath - "+e.getMessage());
+                    else{
+                        File file = new File(Environment.getExternalStorageDirectory() + "/Gilt/temprecord.mp3");
+                        try{
+                            FileInputStream in=new FileInputStream(file);
+                            byte fileContent[] = new byte[(int)file.length()];
+                            in.read(fileContent,0,fileContent.length);
+                            audioString = Base64.encodeToString(fileContent,0);
+                        }
+                        catch (Exception e){
+                            System.out.println("Sarath - "+e.getMessage());
+                        }
+                        params.put("audio",audioString);
+                        params.put("audioname","record.mp3");
                     }
-                    //String audioString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-                    params.put("audio",audioString);
-                    params.put("audioname","record.3gp");
                 }
                 try{
-                    //System.out.println("Sarath -- "+params);
                     return requestHandler.sendPostRequest(Urls.URL_ADD_ORDER, params);
                 }
                 catch (Exception e){
                     Toast.makeText(getApplicationContext(), "Couldn't connect to server", Toast.LENGTH_SHORT).show();
                     return  null;
                 }
-
             }
         }
 
@@ -421,14 +512,9 @@ public class AddOrder extends AppCompatActivity {
     }
 
     private void requestStoragePermission() {
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
             return;
-
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            //If the user has denied the permission previously your code will come to this block
-            //Here you can explain why you need this permission
-            //Explain here why you need this permission
         }
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
     }
@@ -451,26 +537,21 @@ public class AddOrder extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
-
             filepath = data.getData();
             try {
                 img_layout.setVisibility(View.VISIBLE);
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filepath);
                 thumbnail.setImageBitmap(bitmap);
                 customfilepath=getPath(filepath);
-                System.out.println("srath -  "+customfilepath);
                 filename=getPath(filepath).substring(getPath(filepath).lastIndexOf("/")+1);
                 txt_filepath.setText(filename);
-                //Toast.makeText(getApplicationContext(),getPath(filepath),Toast.LENGTH_LONG).show();
             } catch (Exception ex) {
 
             }
         }
     }
     private String getPath(Uri uri) {
-
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         cursor.moveToFirst();
         String document_id = cursor.getString(0);
@@ -521,7 +602,9 @@ public class AddOrder extends AppCompatActivity {
                     arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     modelSpinner.setAdapter(arrayAdapter);
                     if(b != null) {
-                        modelSpinner.setSelection(models.indexOf(b.get("modelname").toString()));
+                        if(b.containsKey("orderID")){
+                            modelSpinner.setSelection(models.indexOf(b.get("modelname").toString()));
+                        }
                     }
 
                 }else {
@@ -548,20 +631,18 @@ public class AddOrder extends AppCompatActivity {
     }
 
     class GetFactoryList extends AsyncTask<Void, Void, String> {
-
         ProgressBar progressBar;
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //progressBar = (ProgressBar) findViewById(R.id.progressBar);
-            // progressBar.setVisibility(View.VISIBLE);
+            progressBar = (ProgressBar) findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-
+            progressBar.setVisibility(View.GONE);
             try {
                 JSONObject obj = new JSONObject(s);
                 //Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
@@ -577,7 +658,10 @@ public class AddOrder extends AppCompatActivity {
                     arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     factorySpinner.setAdapter(arrayAdapter);
                     if(b != null) {
-                        factorySpinner.setSelection(factories.indexOf(b.get("factoryname").toString()));
+                        if(b.containsKey("orderID")){
+                            factorySpinner.setSelection(factories.indexOf(b.get("factoryname").toString()));
+                        }
+
                     }
                 }else {
                     Toast.makeText(getApplicationContext(), "Invalid params called", Toast.LENGTH_SHORT).show();
@@ -629,14 +713,14 @@ public class AddOrder extends AppCompatActivity {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                //progressBar = (ProgressBar) findViewById(R.id.progressBar);
-                //progressBar.setVisibility(View.VISIBLE);
+                progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
-                //progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 try {
                     JSONObject obj = new JSONObject(s);
                     if (!obj.getBoolean("error")) {
@@ -710,5 +794,105 @@ public class AddOrder extends AppCompatActivity {
 
         UpdateOrderReq uor = new UpdateOrderReq();
         uor.execute();
+    }
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public void deleteAudioTemp(Uri deleteUri){
+        String path=getRealPathFromURI(getApplicationContext(),deleteUri);
+        System.out.println("delete audio path - "+path);
+        if(path.contains(" (1)")){
+            path=path.replace(" (1)","");
+        }
+        if(!path.isEmpty()){
+            File fdelete =new File(path);
+            if (fdelete.exists()) {
+                if (fdelete.delete()) {
+                    System.out.println("file Deleted :" );
+                } else {
+                    System.out.println("file not Deleted :");
+                }
+            }
+        }
+    }
+
+    //Pre Android Q
+    public void recordingProcessOld(){
+        File folder = new File(Environment.getExternalStorageDirectory()
+                + File.separator + "gilt"+File.separator );
+        boolean success = true;
+        if (!folder.exists()) {
+            success = folder.mkdirs();
+        }
+        if (success) {
+            pathsave= Environment.getExternalStorageDirectory().getAbsolutePath()+"/Gilt/"+"temprecord.mp3";
+        } else {
+
+        }
+        if(checkPermissionForRecord()){
+            if(btnStatus==1){
+                recordingProcessOldStart();
+            }
+            else if(btnStatus==2){
+                recordingProcessOldStop();
+            }
+        }
+        else{
+            requestRecordPermission();
+        }
+    }
+    public void recordingProcessOldStart(){
+        if(btnStatus==1){
+            AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.playtopause);
+            record_btn.setImageDrawable(drawable);
+            drawable.start();
+            startHTime = 0L;
+            timeInMilliseconds = 0L;
+            timeSwapBuff = 0L;
+            updatedTime = 0L;
+            btnStatus=2;
+            recordText.setText("Recording...");
+            setupMediaRecorder();
+            try{
+                mediaRecorder.prepare();
+                mediaRecorder.start();
+                startHTime = SystemClock.uptimeMillis();
+                customHandler.postDelayed(updateTimerThread, 0);
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+    public void recordingProcessOldStop(){
+        if(btnStatus==2) {
+            AnimatedVectorDrawable drawable = (AnimatedVectorDrawable) getResources().getDrawable(R.drawable.pausetoplay);
+            record_btn.setImageDrawable(drawable);
+            drawable.start();
+            mediaRecorder.stop();
+            timeSwapBuff += timeInMilliseconds;
+            customHandler.removeCallbacks(updateTimerThread);
+            //recordText.setText("Audio Recorded"+recordText.toString());
+            TextView tv = (TextView) recordText.getCurrentView();
+            if (tv.getText().toString().length() > 0) {
+                tv.setText("Audio Recorded - " + tv.getText().toString());
+                isAudioRecorded = true;
+            }
+            isAudioRecorded = true;
+            btnStatus = 3;
+            close_recording.setVisibility(View.VISIBLE);
+        }
     }
 }

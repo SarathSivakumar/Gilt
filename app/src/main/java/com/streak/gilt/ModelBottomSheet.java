@@ -39,6 +39,7 @@ public class ModelBottomSheet extends BottomSheetDialogFragment {
                 String modelName=etNewModelName.getText().toString();
                 if (!modelName.isEmpty()){
                     dismiss();
+                    etNewModelName.getText().clear();
                     ModelManagement activity = (ModelManagement) getActivity();
                     activity.onCloseDialog(modelName);
                 }

@@ -16,4 +16,7 @@
     <color name="ash">#E2E2EA</color>
     <color name="signupColor">#066e8a</color>
 
+    <color name="primaryBlue">#144DDA</color>
+    <color name="primaryBackground">#F9F8F7</color>
+
 </resources>
